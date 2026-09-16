@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NANNI · Speisekarte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,450;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FEFBF5;
+    --cream-2:#F3E9D6;
+    --matcha:#5E7A3E;
+    --matcha-dark:#33401F;
+    --coffee:#3A2415;
+    --coffee-warm:#6E4322;
+    --ink:#221D17;
+    --desc:#524A3E;
+    --blush:#BD5B3C;
+    --line: rgba(43,38,32,0.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Manrope', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  button{ font: inherit; color: inherit; background:none; border:none; }
+
+  /* ===== Blob signature shape ===== */
+  .blob{ border-radius: 42% 58% 61% 39% / 47% 45% 55% 53%; }
+
+  /* ===== Hero ===== */
+  .hero{
+    position:relative;
+    padding: 56px 24px 90px;
+    background: var(--matcha-dark);
+    color: var(--cream);
+    overflow:hidden;
+    text-align:center;
+    isolation:isolate;
+  }
+  .hero-video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; z-index:0;
+  }
+  .hero-overlay{
+    position:absolute; inset:0; z-index:1;
+    background: linear-gradient(180deg, rgba(51,64,31,0.72) 0%, rgba(51,64,31,0.55) 45%, rgba(51,64,31,0.85) 100%);
+  }
+  .hero-eyebrow{ position:relative; z-index:2; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; opacity:0.88; margin-bottom:18px; }
+  .hero h1{ position:relative; z-index:2; font-family:'Fraunces', serif; font-optical-sizing:auto; font-weight:600; font-size: clamp(44px, 13vw, 64px); line-height:0.95; letter-spacing:-0.01em; }
+  .hero p.tag{ position:relative; z-index:2; font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:18px; margin-top:16px; opacity:0.96; }
+  .hero .addr{ position:relative; z-index:2; margin-top:22px; font-size:13px; opacity:0.85; letter-spacing:0.02em; }
+
+  /* ===== Sticky nav ===== */
+  .navwrap{ position:sticky; top:0; z-index:20; background: rgba(251,243,231,0.94); backdrop-filter: blur(8px); border-bottom:1px solid var(--line); }
+  .nav{ display:flex; gap:8px; overflow-x:auto; padding: 12px 16px; scrollbar-width:none; }
+  .nav::-webkit-scrollbar{ display:none; }
+  .nav a{ flex:0 0 auto; font-size:13px; font-weight:700; text-decoration:none; color: var(--matcha-dark); background: var(--cream-2); padding:9px 16px; border-radius:999px; white-space:nowrap; letter-spacing:0.01em; transition: background .15s ease, color .15s ease; }
+  .nav a:hover, .nav a:focus-visible{ background: var(--matcha); color: var(--cream); outline: none; }
+
+  /* ===== Sections ===== */
+  main{ max-width:640px; margin:0 auto; padding: 8px 20px 0; }
+  section.cat{ padding: 46px 0 10px; scroll-margin-top: 64px; }
+  .cat-head{ display:flex; align-items:baseline; gap:14px; margin-bottom: 6px; }
+  .cat-head h2{ font-family:'Fraunces', serif; font-weight:600; font-size: 30px; color: var(--coffee); letter-spacing:-0.01em; }
+  .cat-sub{ font-family:'Fraunces', serif; font-style:italic; font-weight:300; font-size:14.5px; color: var(--coffee-warm); margin-bottom: 22px; }
+  .divider{ width:34px; height:34px; background: var(--matcha); opacity:0.85; margin: 4px 0 20px; }
+
+  .items{ display:flex; flex-direction:column; }
+  .item{ border-bottom: 1px solid var(--line); }
+  .item:last-child{ border-bottom:none; }
+
+  .item-toggle{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:14px;
+    padding: 14px 2px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .item-name{ font-size:16.5px; font-weight:700; color: var(--ink); line-height:1.3; }
+  .item-right{ display:flex; align-items:center; gap:12px; flex:0 0 auto; }
+  .item-price{ font-weight:800; font-size:15.5px; color: var(--matcha-dark); white-space:nowrap; }
+  .item-arrow{
+    width:22px; height:22px;
+    flex:0 0 auto;
+    border-radius:50%;
+    background: var(--cream-2);
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .25s ease, background .2s ease;
+  }
+  .item-arrow svg{ width:11px; height:11px; transition: transform .25s ease; }
+  .item[data-open="true"] .item-arrow{ background: var(--matcha); transform: rotate(180deg); }
+  .item[data-open="true"] .item-arrow svg path{ stroke: var(--cream); }
+
+  .item-panel{
+    max-height:0;
+    overflow:hidden;
+    transition: max-height .28s ease;
+  }
+  .item-panel-inner{
+    padding: 0 2px 16px;
+  }
+  .item-desc{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:14px;
+    color: var(--desc);
+    line-height:1.5;
+  }
+
+  .badge{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; background: var(--blush); color: white; padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle; position:relative; top:-1px; }
+
+  /* ===== Signature callout (Shokupan) ===== */
+  .signature{ margin: 54px 0 10px; background: var(--coffee); color: var(--cream); border-radius: 42% 58% 61% 39% / 47% 45% 55% 53%; padding: 54px 34px; text-align:center; }
+  .signature h3{ font-family:'Fraunces', serif; font-weight:600; font-style:italic; font-size: 26px; margin-bottom:10px; }
+  .signature p{ font-size:13.5px; opacity:0.85; max-width:320px; margin:0 auto; line-height:1.55; }
+
+  footer{ text-align:center; padding: 60px 24px 20px; font-size:12px; color:#8a8072; }
+  footer .fname{ font-family:'Fraunces', serif; font-style:italic; font-size:15px; color: var(--coffee); margin-bottom:6px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <video class="hero-video" autoplay muted loop playsinline preload="auto">
+    <source src="nanni-hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-eyebrow">Redlingerstraße 11 · Osnabrück</div>
+  <h1>NANNI</h1>
+  <p class="tag">Specialty Coffee, Matcha & fluffiges Shokupan</p>
+  <div class="addr">Mo–Sa 10–18 Uhr · So 10–17 Uhr</div>
+</div>
+
+<div class="navwrap">
+  <nav class="nav" id="nav">
+    <a href="#kaffee">Kaffee</a>
+    <a href="#tee-matcha">Tee &amp; Matcha</a>
+    <a href="#signature-drinks">Signature Drinks</a>
+    <a href="#frisch">Frisch gepresst</a>
+    <a href="#soft">Softdrinks</a>
+    <a href="#fruehstueck">Frühstück</a>
+    <a href="#bowls">Bowls</a>
+    <a href="#shokupan">Shokupan</a>
+    <a href="#bagel">Bagel</a>
+    <a href="#waffeln">Waffeln</a>
+    <a href="#mittag">Mittagstisch</a>
+    <a href="#kuchen">Kuchen</a>
+    <a href="#aperitif">Aperitif</a>
+  </nav>
+</div>
+
+<main>
+
+  <section class="cat" id="kaffee">
+    <div class="cat-head"><h2>Kaffee</h2></div>
+    <p class="cat-sub">Langsam extrahiert, für den ruhigen Moment am Tresen</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Espresso</span><span class="item-right"><span class="item-price">2,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Einzelner Shot, kräftig und samtig.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Doppio</span><span class="item-right"><span class="item-price">4,40 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Doppelter Espresso für den vollen Wachmacher.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Espresso Macchiato</span><span class="item-right"><span class="item-price">3,30 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Espresso mit einem Hauch Milchschaum.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Café Crema</span><span class="item-right"><span class="item-price">3,20 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Mild und langgezogen, nach italienischer Art.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Americano</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Espresso, verlängert mit heißem Wasser.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Cappuccino</span><span class="item-right"><span class="item-price">3,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Espresso, heiße Milch, feiner Schaum.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Flat White</span><span class="item-right"><span class="item-price">5,30 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Doppelter Espresso, samtiger Milchschaum.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Latte Macchiato</span><span class="item-right"><span class="item-price">4,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Milch und Espresso, sanft geschichtet.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Milchkaffee</span><span class="item-right"><span class="item-price">4,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Klassisch mild, mit viel Milch.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="tee-matcha">
+    <div class="cat-head"><h2>Tee &amp; Matcha</h2></div>
+    <p class="cat-sub">Zeremoniell geschlagen, frisch aufgebrüht</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Earl Grey</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Schwarzer Tee mit Bergamotte.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Grüner Tee</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Mild und fein aromatisch.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Kamille Tee</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Beruhigend, ideal zum Ausklang.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Frischer Minztee</span><span class="item-right"><span class="item-price">4,20 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Frisch aufgebrühte Minzblätter.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Frischer Ingwer-Zitronen-Tee</span><span class="item-right"><span class="item-price">4,20 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Wärmend, mit frischer Zitrusnote.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Matcha Hot<span class="badge">Special</span></span><span class="item-right"><span class="item-price">5,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Zeremoniell geschlagener Matcha, warm serviert.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Iced Matcha</span><span class="item-right"><span class="item-price">5,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Matcha auf Eis, cremig verrührt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Strawberry Iced Matcha</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Iced Matcha mit Erdbeerpüree.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Mango Iced Matcha</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Iced Matcha mit Mangopüree.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="signature-drinks">
+    <div class="cat-head"><h2>Signature Drinks</h2></div>
+    <p class="cat-sub">Unsere Lieblinge, heiß und eisgekühlt</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Iced Americano</span><span class="item-right"><span class="item-price">3,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Espresso, Wasser, viel Eis.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Iced Latte</span><span class="item-right"><span class="item-price">4,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Espresso, kalte Milch, Eiswürfel.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Iced Vanille Latte</span><span class="item-right"><span class="item-price">5,20 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Iced Latte mit feiner Vanillenote.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Chai Latte</span><span class="item-right"><span class="item-price">4,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Gewürztee mit heißer Milch.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Iced Chai Latte</span><span class="item-right"><span class="item-price">4,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Chai Latte, eisgekühlt serviert.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Pumpkin Spice Latte</span><span class="item-right"><span class="item-price">5,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Kürbisgewürz-Latte, warm und würzig.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Hot Chocolate</span><span class="item-right"><span class="item-price">4,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Heiße Schokolade, cremig.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">White Schoki</span><span class="item-right"><span class="item-price">4,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Heiße weiße Schokolade.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="frisch">
+    <div class="cat-head"><h2>Frisch gepresst</h2></div>
+    <p class="cat-sub">Säfte, Smoothies &amp; hausgemachte Limonade, 0,4l</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Frisch gepresster O-Saft</span><span class="item-right"><span class="item-price">4,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Frisch gepresst, ohne Zusätze.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Beet &amp; Juicy</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Rote Bete, kräftig und erdig.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Berry Banana Smoothie</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Beeren und Banane, cremig gemixt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Green Glow Smoothie</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Grünes Blattgemüse mit Frucht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Mango Sunshine Smoothie</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Mango, sonnig und süß.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Pfirsich-Limo</span><span class="item-right"><span class="item-price">4,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Hausgemacht mit frischem Pfirsich.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Zitronen-Minze Limo</span><span class="item-right"><span class="item-price">6,00 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Erfrischend, mit frischer Minze.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Himbeer-Holunder Limo</span><span class="item-right"><span class="item-price">6,00 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Fruchtig-blumig, hausgemacht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Maracuja-Limette Limo</span><span class="item-right"><span class="item-price">6,00 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Exotisch-säuerlich, hausgemacht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Erdbeer-Basilikum Limo</span><span class="item-right"><span class="item-price">6,00 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Süß-würzig, hausgemacht.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="soft">
+    <div class="cat-head"><h2>Softdrinks &amp; Wasser</h2></div>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Fritz-Kola</span><span class="item-right"><span class="item-price">3,30 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Klassisch koffeinhaltig.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Fritz-Kola Super Zero</span><span class="item-right"><span class="item-price">3,30 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Ohne Zucker, voller Geschmack.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Apfel-Kirsch-Holunder, 0,33l</span><span class="item-right"><span class="item-price">3,30 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Fruchtschorle, spritzig serviert.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Bio-Rhabarberschorle, 0,33l</span><span class="item-right"><span class="item-price">3,30 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Bio-Rhabarber, angenehm säuerlich.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Zurück zu den Quellen, still</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Stilles Wasser.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Zurück zu den Quellen, sprudel</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Spritziges Wasser.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="fruehstueck">
+    <div class="cat-head"><h2>Frühstück</h2></div>
+    <p class="cat-sub">Für den langsamen Start in den Tag</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Rührei Genuss</span><span class="item-right"><span class="item-price">7,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Cremiges Rührei mit Beilagen.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Sunny Morning</span><span class="item-right"><span class="item-price">7,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Leichter Start mit Frischem.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Omelett Bar</span><span class="item-right"><span class="item-price">8,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Omelett, nach deiner Wahl belegt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Nannis Brunch<span class="badge">Fan-Favorit</span></span><span class="item-right"><span class="item-price">13,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Unser meistbestelltes Frühstück.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="bowls">
+    <div class="cat-head"><h2>Bowls, Porridge &amp; French Toast</h2></div>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Classic Açaí Bowl</span><span class="item-right"><span class="item-price">11,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Açaí mit Granola und frischem Obst.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Lotus Crunch Açaí Bowl</span><span class="item-right"><span class="item-price">12,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Açaí mit Lotus-Keksen und Crunch.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Apfel Porridge</span><span class="item-right"><span class="item-price">9,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Warmes Porridge mit Apfel.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Bananen Porridge</span><span class="item-right"><span class="item-price">9,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Warmes Porridge mit Banane.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Classic French Toast</span><span class="item-right"><span class="item-price">11,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Getoastetes Brot, karamellisiert, klassisch.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Lotus Shokupan French Toast</span><span class="item-right"><span class="item-price">11,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Fluffiger Shokupan mit Lotus-Karamell.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Süßkartoffel-Pancakes mit Hähnchen</span><span class="item-right"><span class="item-price">11,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Herzhafte Pancakes mit Hähnchen.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Süßkartoffel-Pancakes mit Lachs</span><span class="item-right"><span class="item-price">11,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Herzhafte Pancakes mit Lachs.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Süßkartoffel-Pancakes mit Feta</span><span class="item-right"><span class="item-price">11,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Herzhafte Pancakes mit Feta.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Pancakes Klassik Berry</span><span class="item-right"><span class="item-price">10,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Fluffige Pancakes mit Beeren.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Pancakes Lotus</span><span class="item-right"><span class="item-price">10,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Fluffige Pancakes mit Lotus-Karamell.</p></div></div></div>
+    </div>
+  </section>
+
+  <div class="signature blob">
+    <h3>Shokupan — fluffig, wie er sein soll</h3>
+    <p>Unser japanisches Milchbrot wird täglich frisch gebacken: außen leicht geröstet, innen so weich, dass es beim ersten Bissen zusammenfällt.</p>
+  </div>
+
+  <section class="cat" id="shokupan">
+    <div class="cat-head"><h2>Shokupan Spezial</h2></div>
+    <p class="cat-sub">Herzhaft belegt, warm serviert</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Haloumi Shokupan</span><span class="item-right"><span class="item-price">11,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Gegrillter Haloumi auf fluffigem Shokupan.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Sucuk Shokupan</span><span class="item-right"><span class="item-price">12,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Würzige Sucuk auf fluffigem Shokupan.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Burrata Shokupan</span><span class="item-right"><span class="item-price">13,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Cremige Burrata auf fluffigem Shokupan.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Pastrami New York</span><span class="item-right"><span class="item-price">13,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Pastrami, deftig auf Shokupan belegt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Nanni Egg Drop</span><span class="item-right"><span class="item-price">10,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Weiches Ei auf fluffigem Shokupan.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="bagel">
+    <div class="cat-head"><h2>Bagel</h2></div>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Avocado Kimchi Bagel</span><span class="item-right"><span class="item-price">9,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Avocado und würziges Kimchi.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Haloumi Bagel</span><span class="item-right"><span class="item-price">10,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Gegrillter Haloumi, warm serviert.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Sucuk Bagel</span><span class="item-right"><span class="item-price">10,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Würzige Sucuk, herzhaft belegt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Salmon Bagel</span><span class="item-right"><span class="item-price">10,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Lachs, frisch belegt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Bagel Egg</span><span class="item-right"><span class="item-price">9,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Klassisch mit Ei belegt.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Smoky Tofu Bagel</span><span class="item-right"><span class="item-price">8,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Geräucherter Tofu, vegan.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="waffeln">
+    <div class="cat-head"><h2>Waffeln</h2></div>
+    <p class="cat-sub">Frisch gebacken, warm serviert</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffel Classic</span><span class="item-right"><span class="item-price">3,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Klassisch, pur genießen.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffel heiße Liebe</span><span class="item-right"><span class="item-price">5,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Warme Kirschen, süße Sünde.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffel Peanut</span><span class="item-right"><span class="item-price">5,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Erdnussbutter und Karamell.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffeln Banana Choc</span><span class="item-right"><span class="item-price">6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Banane und Schokolade.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffel Kirschtraum</span><span class="item-right"><span class="item-price">6,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Kirschen und Sahne.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffel Lotus</span><span class="item-right"><span class="item-price">7,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Lotus-Keks-Creme und Crunch.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Oreo Berry Banana</span><span class="item-right"><span class="item-price">7,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Oreo, Beeren, Banane.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">White Bueno Crunch</span><span class="item-right"><span class="item-price">7,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Weiße Schokolade, Haselnuss-Crunch.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Waffel Fruity</span><span class="item-right"><span class="item-price">8,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Bunter Fruchtmix, frisch.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="mittag">
+    <div class="cat-head"><h2>Mittagstisch</h2></div>
+    <p class="cat-sub">Sommerkarte · Mo–Fr, solange der Vorrat reicht</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Lunch Deal</span><span class="item-right"><span class="item-price">9,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Tagesangebot, wechselt täglich.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Summer Berry Salat</span><span class="item-right"><span class="item-price">11,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Sommersalat mit frischen Beeren.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Wildkräutersalat Chicken</span><span class="item-right"><span class="item-price">13,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Wildkräuter mit gegrilltem Hähnchen.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Golden Goat Sandwich</span><span class="item-right"><span class="item-price">12,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Ziegenkäse, warm und herzhaft.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Spicy Chicken Sandwich</span><span class="item-right"><span class="item-price">13,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Würziges Hähnchen, angenehm pikant.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Inkl. Getränk<span class="badge">Aufpreis</span></span><span class="item-right"><span class="item-price">+ 6,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Limo, Kaffee oder Tee zur Mittagstisch-Wahl.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="kuchen">
+    <div class="cat-head"><h2>Kuchen</h2></div>
+    <p class="cat-sub">Hausgemacht, täglich wechselnd</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Kuchen, klein</span><span class="item-right"><span class="item-price">3,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Kleines Stück, hausgemacht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Kuchen</span><span class="item-right"><span class="item-price">4,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Stück Kuchen, hausgemacht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Kuchen, groß</span><span class="item-right"><span class="item-price">5,20 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Großzügiges Stück, hausgemacht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Veganer Kuchen</span><span class="item-right"><span class="item-price">5,90 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Rein pflanzlich, hausgemacht.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Kuchen-Deal<span class="badge">Nachmittag</span></span><span class="item-right"><span class="item-price">6,00 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Kuchen plus Getränk nach Wahl.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="cat" id="aperitif">
+    <div class="cat-head"><h2>Aperitif</h2></div>
+    <p class="cat-sub">Für den Ausklang am Nachmittag</p>
+    <div class="divider blob"></div>
+    <div class="items">
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Aperol Spritz</span><span class="item-right"><span class="item-price">7,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Aperol, Prosecco, Soda.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Lillet</span><span class="item-right"><span class="item-price">7,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Lillet Blanc, spritzig serviert.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Sarti</span><span class="item-right"><span class="item-price">7,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Sarti Rosso, als Spritz.</p></div></div></div>
+      <div class="item" data-open="false"><button class="item-toggle"><span class="item-name">Limoncello Spritz</span><span class="item-right"><span class="item-price">7,50 €</span><span class="item-arrow"><svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="#33401F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button><div class="item-panel"><div class="item-panel-inner"><p class="item-desc">Limoncello, spritzig-frisch.</p></div></div></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fname">NANNI Coffee &amp; Bar</div>
+  Redlingerstraße 11 · 49074 Osnabrück<br>
+  Prototyp erstellt von Tapvio
+</footer>
+
+<script>
+  document.querySelectorAll('.item-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var item = btn.closest('.item');
+      var panel = item.querySelector('.item-panel');
+      var isOpen = item.getAttribute('data-open') === 'true';
+      if(isOpen){
+        panel.style.maxHeight = null;
+        item.setAttribute('data-open','false');
+      } else {
+        item.setAttribute('data-open','true');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
